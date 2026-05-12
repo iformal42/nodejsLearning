@@ -1,5 +1,26 @@
 const fs = require('fs');
 const tours = JSON.parse(fs.readFileSync(`./dev-data/data/tours-simple.json`));
+const validateTour = (req, res, next) => {
+  const { name, price } = req.body;
+  if (!name || !price)
+    return res.status(404).json({
+      status: 'fail',
+      message: 'name , priceProperty not define',
+    });
+  next();
+};
+const checkId = (req, res, next, val) => {
+  const id = val;
+  const tour = tours.find((el) => el.id == id);
+  if (!tour) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'No tour',
+    });
+  }
+  req.tour = tour;
+  next();
+};
 
 const getAllTours = (req, res) => {
   res.status(200).json({
@@ -12,19 +33,9 @@ const getAllTours = (req, res) => {
 };
 
 const getTour = (req, res) => {
-  const { id } = req.params;
-  const tour = tours.find((el) => el.id == id);
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'No tour',
-    });
-  }
   res.status(200).json({
     status: 'success',
-    data: {
-      tour,
-    },
+    data: req.tour,
   });
 };
 
@@ -45,15 +56,8 @@ const createTour = (req, res) => {
 };
 
 const updateTour = (req, res) => {
-  const { id } = req.params;
   const { body } = req;
-  const tour = tours.find((el) => el.id == id);
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'No tour ',
-    });
-  }
+
   for (const [key, value] of Object.entries(body)) {
     tour[key] = value;
   }
@@ -72,4 +76,6 @@ module.exports = {
   createTour,
   updateTour,
   deleteTour,
+  checkId,
+  validateTour,
 };
