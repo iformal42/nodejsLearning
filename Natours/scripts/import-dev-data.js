@@ -13,6 +13,30 @@ async function importData() {
     console.error(error);
   }
 }
+async function updateData() {
+  try {
+    let tours = await fs.readFile('dev-data/data/tours-simple.json', {
+      encoding: 'utf-8',
+    });
+    tours = JSON.parse(tours);
+
+    tours.forEach((tour) => {
+      Tour.updateOne(
+        {
+          name: tour.name,
+        },
+        {
+          startDates: tour.startDates,
+        },
+        {
+          runValidators: true,
+        },
+      );
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
 async function DeleteImportData() {
   try {
     await Tour.deleteMany();
@@ -26,6 +50,7 @@ async function DeleteImportData() {
 module.exports = {
   DeleteImportData,
   importData,
+  updateData,
 };
 // if (process.argv[2] === '--import') importData();
 if (process.argv[2] === '--delete') DeleteImportData();
