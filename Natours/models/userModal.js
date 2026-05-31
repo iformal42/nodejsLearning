@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     maxlength: [15, 'A password name must have max 15 chars'],
     minlength: [8, 'A password name must have min 8 chars'],
+    select: false,
   },
   confirmPassword: {
     type: String,
@@ -39,9 +40,14 @@ const userSchema = new mongoose.Schema({
       },
       message: 'Password should match with confirm password',
     },
+    select: false,
   },
   photo: {
     type: String,
+  },
+  __v: {
+    type: Number,
+    select: false,
   },
 });
 userSchema.pre('save', async function (next) {
@@ -51,6 +57,17 @@ userSchema.pre('save', async function (next) {
   this.confirmPassword = undefined;
   next();
 });
+
+userSchema.methods.correctPassword = async function (candidatePwd, userPwd) {
+  return await bcrypt.compare(candidatePwd, userPwd);
+};
+
+userSchema.post('save', function (user, next) {
+  user.password = undefined;
+  user.__v = undefined;
+  next();
+});
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
