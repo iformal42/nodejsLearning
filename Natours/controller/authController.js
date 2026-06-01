@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModal');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const { log } = require('console');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -18,7 +17,6 @@ const signup = catchAsync(async (req, res, next) => {
     email: body.email,
     password: body.password,
     confirmPassword: body.confirmPassword,
-    passwordChangeAt: body.passwordChangeAt,
   });
   const token = signToken(newUser._id);
   res.status(201).json({
@@ -75,8 +73,22 @@ const protect = catchAsync(async (req, res, next) => {
 
   next();
 });
+
+const restrictsTo =
+  (...roles) =>
+  (req, res, next) => {
+    const { role } = req.user;
+    if (!roles.includes(role)) {
+      return next(
+        new AppError(403, 'You do not have permission to perform this action'),
+      );
+    }
+    next();
+  };
+
 module.exports = {
   signup,
   login,
   protect,
+  restrictsTo,
 };

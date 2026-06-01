@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const { roles } = require('../utils/constanst');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -41,6 +42,11 @@ const userSchema = new mongoose.Schema({
       message: 'Password should match with confirm password',
     },
     select: false,
+  },
+  role: {
+    type: String,
+    enum: [roles.user, roles.guid, roles.leadGuide, roles.admin],
+    default: roles.user,
   },
   photo: {
     type: String,
