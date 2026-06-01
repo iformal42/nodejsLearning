@@ -1,7 +1,9 @@
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModal');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { log } = require('console');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -16,6 +18,7 @@ const signup = catchAsync(async (req, res, next) => {
     email: body.email,
     password: body.password,
     confirmPassword: body.confirmPassword,
+    passwordChangeAt: body.passwordChangeAt,
   });
   const token = signToken(newUser._id);
   res.status(201).json({
@@ -46,8 +49,34 @@ const login = catchAsync(async (req, res, next) => {
     token,
   });
 });
+const protect = catchAsync(async (req, res, next) => {
+  const { authorization } = req.headers;
 
+  if (!authorization || !authorization.startsWith('Bearer'))
+    return next(new AppError(401, 'Invalid users'));
+
+  const token = authorization.split(' ')[1];
+  // console.log();
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  const { id: userId, iat } = decoded;
+
+  const currentUser = await User.findById(userId);
+  if (!currentUser) {
+    return next(
+      new AppError(401, 'The user belonging to session is not exits'),
+    );
+  }
+  const isPasswordChangedAfter = currentUser.changedPasswordAfter(iat);
+  if (isPasswordChangedAfter) {
+    next(new AppError(401, 'Password is changed. Please login again'));
+  }
+
+  req.user = currentUser;
+
+  next();
+});
 module.exports = {
   signup,
   login,
+  protect,
 };

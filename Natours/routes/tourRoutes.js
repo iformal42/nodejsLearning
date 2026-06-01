@@ -12,9 +12,10 @@ const {
   getTourStats,
   getMonthlyClient,
 } = require('../controller/tourController');
+const { protect } = require('../controller/authController');
 
 // router.param('id', checkId);
-router.route('/').get(getAllTours).post(createTour);
+router.route('/').get(protect, getAllTours).post(protect, createTour);
 
 router.route('/tour-stats').get(getTourStats);
 router.route('/monthly-plan/:year').get(getMonthlyClient);
