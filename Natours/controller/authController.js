@@ -3,6 +3,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModal');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const sendEmail = require('../utils/email');
+const crypto = require('crypto');
+
+const { BASEURL } = require('../utils/constanst');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -86,9 +90,73 @@ const restrictsTo =
     next();
   };
 
+const forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new AppError(404, 'No user found with given email.'));
+  }
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  const resetURL = `${req.protocol}://${req.get('host')}${BASEURL}/reset-password/${resetToken}`;
+  const message = `forgot your password? Submit a request with your new password to: ${resetURL}.\nIf you didn't forgot your password, please ignore this email. `;
+
+  try {
+    await sendEmail({
+      email,
+      subject: 'Your reset password token (valid for 10 min)',
+      message,
+    });
+  } catch (error) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(
+      new AppError('There was an error sending the email. Try again later'),
+    );
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Token sent to email',
+  });
+  // next();
+});
+
+const resetPassword = catchAsync(async (req, res, next) => {
+  const { resetToken } = req.params;
+
+  const { password, confirmPassword } = req.body;
+  const passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  const user = await User.findOne({
+    passwordResetToken: passwordResetToken,
+    passwordResetExpires: { $gte: Date.now() },
+  });
+  if (!user) {
+    return next(new AppError(400, 'Token is invalid or has expired'));
+  }
+  user.password = password;
+  user.confirmPassword = confirmPassword;
+  user.passwordResetExpires = undefined;
+  user.passwordResetToken = undefined;
+  const token = signToken(user._id);
+  await user.save();
+
+  res.status(200).json({
+    status: 'success',
+    token,
+  });
+});
+
 module.exports = {
   signup,
   login,
   protect,
   restrictsTo,
+  forgotPassword,
+  resetPassword,
 };

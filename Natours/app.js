@@ -5,17 +5,17 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controller/errorController');
+const { BASEURL } = require('./utils/constanst');
 
 const app = express();
 
-const baseUrl = '/api/v1';
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 app.use(express.json());
 app.use(express.static('./public'));
 
-app.use(`${baseUrl}/tours`, tourRouter);
-app.use(`${baseUrl}/users`, userRouter);
+app.use(`${BASEURL}/tours`, tourRouter);
+app.use(`${BASEURL}/users`, userRouter);
 
 // This runs if above middle ware wont triggered
 app.all('*', (req, res, next) => {
