@@ -152,6 +152,30 @@ const resetPassword = catchAsync(async (req, res, next) => {
   });
 });
 
+const updatePassword = catchAsync(async (req, res, next) => {
+  const { user } = req;
+  const { currentPassword, newPassword, passwordConfirm } = req.body;
+  const userWithPassword = await User.findById(user._id).select('password');
+  if (!userWithPassword) {
+    return next(new AppError(404, 'Current user is not exits'));
+  }
+  const isCorrect = await userWithPassword.correctPassword(
+    currentPassword,
+    userWithPassword.password,
+  );
+
+  if (!isCorrect) {
+    return next(new AppError(401, 'Incorrect password'));
+  }
+  userWithPassword.password = newPassword;
+  userWithPassword.confirmPassword = passwordConfirm;
+  await userWithPassword.save();
+  const token = signToken(userWithPassword._id);
+  res.status(200).json({
+    status: 'success',
+    token,
+  });
+});
 module.exports = {
   signup,
   login,
@@ -159,4 +183,5 @@ module.exports = {
   restrictsTo,
   forgotPassword,
   resetPassword,
+  updatePassword,
 };

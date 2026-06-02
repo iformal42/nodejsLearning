@@ -14,10 +14,13 @@ const {
   login,
   forgotPassword,
   resetPassword,
+  updatePassword,
+  protect,
 } = require('../controller/authController');
 
 router.post('/signup', signup);
 router.post('/login', login);
+router.patch('/update-password', protect, updatePassword);
 
 router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:resetToken', resetPassword);
