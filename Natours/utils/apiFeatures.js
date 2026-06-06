@@ -3,6 +3,7 @@ class APIFeatures {
     this.query = query;
     this.params = params;
   }
+
   filter() {
     let queryObj = { ...this.params };
     const excludedFields = ['page', 'limit', 'sort', 'fields'];
@@ -17,6 +18,7 @@ class APIFeatures {
     this.query = this.query.find(queryObj);
     return this;
   }
+
   sort() {
     let sortBy = '-createdAt';
     if (this.params.sort) {
@@ -25,6 +27,7 @@ class APIFeatures {
     this.query = this.query.sort(sortBy);
     return this;
   }
+
   limitFields() {
     if (this.params.fields) {
       const fields = this.params.fields.split(',').join(' ');
@@ -32,9 +35,12 @@ class APIFeatures {
     }
     return this;
   }
+
   paginate() {
     const page = Math.max(this.params.page * 1, 1);
-    const limit = this.params?.limit * 1 || 10;
+
+    const limit = this.params.limit * 1 || 10;
+
     const skip = (page - 1) * limit;
 
     this.query = this.query.skip(skip).limit(limit);
