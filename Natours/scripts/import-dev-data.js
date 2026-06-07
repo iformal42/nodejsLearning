@@ -3,7 +3,7 @@ const Tour = require('../models/tourModel');
 
 async function importData() {
   try {
-    const tours = await fs.readFile('dev-data/data/tours-simple.json', {
+    const tours = await fs.readFile('dev-data/data/tours.json', {
       encoding: 'utf-8',
     });
 
@@ -15,7 +15,7 @@ async function importData() {
 }
 async function updateData() {
   try {
-    let tours = await fs.readFile('dev-data/data/tours-simple.json', {
+    let tours = await fs.readFile('dev-data/data/tours.json', {
       encoding: 'utf-8',
     });
     tours = JSON.parse(tours);
