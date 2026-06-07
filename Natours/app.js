@@ -8,6 +8,7 @@ const hpp = require('hpp');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controller/errorController');
 const { BASEURL } = require('./utils/constanst');
@@ -48,6 +49,7 @@ app.use(express.static('./public'));
 
 app.use(`${BASEURL}/tours`, tourRouter);
 app.use(`${BASEURL}/users`, userRouter);
+app.use(`${BASEURL}/reviews`, reviewRouter);
 
 // This runs if above middle ware wont triggered
 app.all('*', (req, res, next) => {
