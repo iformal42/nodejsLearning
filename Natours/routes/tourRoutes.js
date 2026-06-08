@@ -14,8 +14,11 @@ const {
 } = require('../controller/tourController');
 const { protect, restrictsTo } = require('../controller/authController');
 const { roles } = require('../utils/constanst');
+const reviewRouter = require('./reviewRoutes');
 
 // router.param('id', checkId);
+
+router.use('/:tourId/reviews', reviewRouter);
 router.route('/').get(protect, getAllTours).post(protect, createTour);
 
 router.route('/tour-stats').get(protect, getTourStats);

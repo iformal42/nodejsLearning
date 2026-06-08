@@ -2,9 +2,12 @@ const Review = require('../models/reviewModel');
 const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const { deleteOne } = require('./handleFactory');
 
 const getAllReviews = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Review.find(), req.query);
+  let filter = {};
+  if (req.params.tourdId) filter = { tour: req.params.tourdId };
+  const features = new APIFeatures(Review.find(filter), req.query);
   const reviews = await features.query;
   res.status(200).json({
     status: 'succes',
@@ -27,7 +30,12 @@ const getReview = catchAsync(async (req, res, next) => {
 });
 
 const createReview = catchAsync(async (req, res, next) => {
+  // Allow nested routes
+  if (!req.body.tourId) req.body.tourId = req.params.tourId;
+  if (!req.body.userId) req.body.userId = req.user.id;
+
   const { review, rating, userId, tourId } = req.body;
+
   const body = { review, rating, user: userId, tour: tourId };
   const newReview = await Review.create(body);
 
@@ -37,8 +45,11 @@ const createReview = catchAsync(async (req, res, next) => {
   });
 });
 
+const deleteReview = deleteOne(Review);
+
 module.exports = {
   getAllReviews,
   getReview,
   createReview,
+  deleteReview,
 };
