@@ -5,16 +5,23 @@ const {
   createReview,
   getReview,
   deleteReview,
+  updateReview,
+  setTourUserIds,
+  setFilterToGetAll,
 } = require('../controller/reviewController');
 const { roles } = require('../utils/constanst');
 
 const router = express.Router({ mergeParams: true });
-
+router.use(protect);
 router
   .route('/')
-  .get(protect, getAllReviews)
-  .post(protect, restrictsTo(roles.user), createReview);
+  .get(setFilterToGetAll, getAllReviews)
+  .post(restrictsTo(roles.user), setTourUserIds, createReview);
 
-router.route('/:id').get(protect, getReview).delete(protect, deleteReview);
+router
+  .route('/:id')
+  .get(getReview)
+  .patch(restrictsTo(roles.admin, roles.user), updateReview)
+  .delete(restrictsTo(roles.admin, roles.user), deleteReview);
 
 module.exports = router;

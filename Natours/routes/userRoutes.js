@@ -4,12 +4,12 @@ const router = express.Router();
 
 const {
   getAllUsers,
-  createUser,
   getUser,
   updateUser,
   deleteUser,
   updateMe,
   deleteMe,
+  getMe,
 } = require('../controller/userController');
 const {
   signup,
@@ -18,18 +18,25 @@ const {
   resetPassword,
   updatePassword,
   protect,
+  restrictsTo,
 } = require('../controller/authController');
+const { roles } = require('../utils/constanst');
 
 router.post('/signup', signup);
 router.post('/login', login);
-router.patch('/update-password', protect, updatePassword);
 
 router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:resetToken', resetPassword);
-router.patch('/update-me', protect, updateMe);
+
+router.use(protect);
+// all below routes are protected
+router.patch('/update-password', updatePassword);
+router.get('/get-me', getMe, getUser);
+router.patch('/update-me', updateMe);
 router.delete('/delete-me', protect, deleteMe);
 
-router.route('/').get(getAllUsers).post(createUser);
-
+router.use(restrictsTo(roles.admin));
+// below routes accessable to admin only
+router.route('/').get(getAllUsers);
 router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
 module.exports = router;

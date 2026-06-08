@@ -1,55 +1,42 @@
 const Review = require('../models/reviewModel');
-const APIFeatures = require('../utils/apiFeatures');
-const AppError = require('../utils/appError');
-const catchAsync = require('../utils/catchAsync');
-const { deleteOne } = require('./handleFactory');
+const {
+  deleteOne,
+  updateOne,
+  createOne,
+  getOne,
+  getAll,
+} = require('./handleFactory');
 
-const getAllReviews = catchAsync(async (req, res, next) => {
+const setFilterToGetAll = (req, res, next) => {
   let filter = {};
   if (req.params.tourdId) filter = { tour: req.params.tourdId };
-  const features = new APIFeatures(Review.find(filter), req.query);
-  const reviews = await features.query;
-  res.status(200).json({
-    status: 'succes',
-    results: reviews.length,
-    data: { reviews },
-  });
-});
+  req.filters = filter;
+  next();
+};
+const getAllReviews = getAll(Review);
 
-const getReview = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  if (!id) {
-    return next(new AppError(400, 'Please provide a id '));
-  }
-  const review = await Review.findById(id);
+const getReview = getOne(Review);
 
-  res.status(200).json({
-    status: 'succes',
-    data: { review },
-  });
-});
-
-const createReview = catchAsync(async (req, res, next) => {
-  // Allow nested routes
+const setTourUserIds = (req, res, next) => {
   if (!req.body.tourId) req.body.tourId = req.params.tourId;
   if (!req.body.userId) req.body.userId = req.user.id;
-
   const { review, rating, userId, tourId } = req.body;
 
   const body = { review, rating, user: userId, tour: tourId };
-  const newReview = await Review.create(body);
+  req.body = body;
+  next();
+};
 
-  res.status(201).json({
-    status: 'succes',
-    data: { newReview },
-  });
-});
-
+const createReview = createOne(Review);
 const deleteReview = deleteOne(Review);
+const updateReview = updateOne(Review);
 
 module.exports = {
   getAllReviews,
   getReview,
   createReview,
   deleteReview,
+  updateReview,
+  setTourUserIds,
+  setFilterToGetAll,
 };

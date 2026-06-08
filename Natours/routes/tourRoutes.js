@@ -19,16 +19,26 @@ const reviewRouter = require('./reviewRoutes');
 // router.param('id', checkId);
 
 router.use('/:tourId/reviews', reviewRouter);
-router.route('/').get(protect, getAllTours).post(protect, createTour);
+router
+  .route('/')
+  .get(getAllTours)
+  .post(protect, restrictsTo(roles.admin, roles.leadGuide), createTour);
 
-router.route('/tour-stats').get(protect, getTourStats);
-router.route('/monthly-plan/:year').get(protect, getMonthlyClient);
-router.route('/top-5-cheap').get(protect, aliasTopTours, getAllTours);
+router.route('/tour-stats').get(getTourStats);
+router
+  .route('/monthly-plan/:year')
+  .get(
+    protect,
+    protect,
+    restrictsTo(roles.admin, roles.leadGuide, roles.guid),
+    getMonthlyClient,
+  );
+router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 
 router
   .route('/:id')
-  .get(protect, getTour)
-  .patch(protect, updateTour)
+  .get(getTour)
+  .patch(protect, restrictsTo(roles.admin, roles.leadGuide), updateTour)
   .delete(protect, restrictsTo(roles.admin, roles.leadGuide), deleteTour);
 
 module.exports = router;
