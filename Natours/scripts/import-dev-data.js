@@ -1,14 +1,24 @@
 const fs = require('fs/promises');
 const Tour = require('../models/tourModel');
+const User = require('../models/userModal');
+const Review = require('../models/reviewModel');
 
 async function importData() {
   try {
     const tours = await fs.readFile('dev-data/data/tours.json', {
       encoding: 'utf-8',
     });
+    const users = await fs.readFile('dev-data/data/users.json', {
+      encoding: 'utf-8',
+    });
+    const reviews = await fs.readFile('dev-data/data/reviews.json', {
+      encoding: 'utf-8',
+    });
 
     // console.log(JSON.parse(tours));
-    await Tour.insertMany(JSON.parse(tours));
+    // await Tour.insertMany(JSON.parse(tours));
+    await User.insertMany(JSON.parse(users), { lean: true });
+    await Review.insertMany(JSON.parse(reviews));
   } catch (error) {
     console.error(error);
   }
@@ -40,6 +50,8 @@ async function updateData() {
 async function DeleteImportData() {
   try {
     await Tour.deleteMany();
+    await User.deleteMany();
+    await Review.deleteMany();
     console.log('data delete successfully');
   } catch (error) {
     console.error(error.message);
