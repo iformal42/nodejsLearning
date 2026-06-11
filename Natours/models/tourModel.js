@@ -132,6 +132,8 @@ tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+tourSchema.index({ price: 1, ratingAverage: -1 });
+tourSchema.index({ slug: 1 });
 
 // tourSchema.pre('save', async function (next) {
 //   const guidesPromises = this.guides.map((id) => User.findById(id));
