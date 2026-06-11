@@ -9,7 +9,7 @@ const {
 
 const setFilterToGetAll = (req, res, next) => {
   let filter = {};
-  if (req.params.tourdId) filter = { tour: req.params.tourdId };
+  if (req.params.tourId) filter = { tour: req.params.tourId };
   req.filters = filter;
   next();
 };
