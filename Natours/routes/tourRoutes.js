@@ -11,6 +11,8 @@ const {
   aliasTopTours,
   getTourStats,
   getMonthlyClient,
+  getTourWithin,
+  getDistnaces,
 } = require('../controller/tourController');
 const { protect, restrictsTo } = require('../controller/authController');
 const { roles } = require('../utils/constanst');
@@ -19,10 +21,6 @@ const reviewRouter = require('./reviewRoutes');
 // router.param('id', checkId);
 
 router.use('/:tourId/reviews', reviewRouter);
-router
-  .route('/')
-  .get(getAllTours)
-  .post(protect, restrictsTo(roles.admin, roles.leadGuide), createTour);
 
 router.route('/tour-stats').get(getTourStats);
 router
@@ -34,7 +32,13 @@ router
     getMonthlyClient,
   );
 router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
+router.get('/tours-within/:distance/center/:latlng/unit/:unit', getTourWithin);
 
+router.route('/distance/:latlng/unit/:unit').get(getDistnaces);
+router
+  .route('/')
+  .get(getAllTours)
+  .post(protect, restrictsTo(roles.admin, roles.leadGuide), createTour);
 router
   .route('/:id')
   .get(getTour)

@@ -135,6 +135,7 @@ tourSchema.pre('save', function (next) {
 });
 tourSchema.index({ price: 1, ratingAverage: -1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 // tourSchema.pre('save', async function (next) {
 //   const guidesPromises = this.guides.map((id) => User.findById(id));
@@ -161,13 +162,13 @@ tourSchema.post(/^find/, function (docs, next) {
   next();
 });
 
-tourSchema.pre('aggregate', function (next) {
-  // this.elemMatch()
-  this._pipeline.unshift({
-    $match: { secretTour: { $ne: true } },
-  });
-  next();
-});
+// tourSchema.pre('aggregate', function (next) {
+//   // this.elemMatch()
+//   this._pipeline.unshift({
+//     $match: { secretTour: { $ne: true } },
+//   });
+//   next();
+// });
 
 // tourSchema.post('save', function (doc, next) {
 //   console.log(doc);
