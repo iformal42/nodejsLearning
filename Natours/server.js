@@ -8,6 +8,7 @@ process.on('uncaughtException', (err) => {
 });
 dotenv.config({ path: './.env' });
 const app = require('./app');
+const { importData, DeleteImportData } = require('./scripts/import-dev-data');
 
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
@@ -30,6 +31,8 @@ const port = process.env.PORT;
 const server = app.listen(port, () => {
   console.log(`Listening on port: ${port}...`);
 });
+// DeleteImportData();
+importData();
 process.on('unhandledRejection', (err) => {
   console.error('UNHANDLE REJECTION! 💥 Shutting down');
   console.error(err);

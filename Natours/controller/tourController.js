@@ -1,5 +1,4 @@
 const Tour = require('../models/tourModel');
-const { param } = require('../routes/reviewRoutes');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const {

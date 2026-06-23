@@ -8,17 +8,23 @@ async function importData() {
     const tours = await fs.readFile('dev-data/data/tours.json', {
       encoding: 'utf-8',
     });
-    const users = await fs.readFile('dev-data/data/users.json', {
-      encoding: 'utf-8',
-    });
-    const reviews = await fs.readFile('dev-data/data/reviews.json', {
-      encoding: 'utf-8',
-    });
+    // const users = await fs.readFile('dev-data/data/users.json', {
+    //   encoding: 'utf-8',
+    // });
+    // const reviews = await fs.readFile('dev-data/data/reviews.json', {
+    //   encoding: 'utf-8',
+    // });
 
-    // console.log(JSON.parse(tours));
+    const allTours = JSON.parse(tours);
+    console.log(allTours);
+
+    for (const tour of allTours) {
+      // console.log(tour.name);
+      await Tour.create(tour);
+    }
     // await Tour.insertMany(JSON.parse(tours));
-    await User.insertMany(JSON.parse(users), { lean: true });
-    await Review.insertMany(JSON.parse(reviews));
+    // await User.insertMany(JSON.parse(users), { lean: true });
+    // await Review.insertMany(JSON.parse(reviews));
   } catch (error) {
     console.error(error);
   }
@@ -50,8 +56,8 @@ async function updateData() {
 async function DeleteImportData() {
   try {
     await Tour.deleteMany();
-    await User.deleteMany();
-    await Review.deleteMany();
+    // await User.deleteMany();
+    // await Review.deleteMany();
     console.log('data delete successfully');
   } catch (error) {
     console.error(error.message);
