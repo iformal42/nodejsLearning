@@ -21,7 +21,34 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 // set securtiy http headers
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+
+        scriptSrc: ["'self'", 'https://cdn.maptiler.com'],
+
+        workerSrc: ["'self'", 'blob:'],
+
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          'https://cdn.maptiler.com',
+          'https://fonts.googleapis.com',
+        ],
+
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://api.maptiler.com'],
+
+        connectSrc: [
+          "'self'",
+          'https://api.maptiler.com',
+          'https://cdn.maptiler.com',
+        ],
+      },
+    },
+  }),
+);
 
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
