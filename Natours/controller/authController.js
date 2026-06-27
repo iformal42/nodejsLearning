@@ -57,6 +57,13 @@ const login = catchAsync(async (req, res, next) => {
   }
   return createSendToken(user, null, res);
 });
+
+const logout = (req, res) => {
+  res.cookie('jwt', '', {
+    expires: new Date(Date.now() + 5 * 1000),
+  });
+  res.status(200).json({ status: 'success' });
+};
 const protect = catchAsync(async (req, res, next) => {
   const { authorization } = req.headers;
 
@@ -91,18 +98,23 @@ const protect = catchAsync(async (req, res, next) => {
 // Only for render pages and no error
 const isLoggedIn = catchAsync(async (req, res, next) => {
   const token = req.cookies.jwt;
-  if (!token) return next();
+  try {
+    if (!token) return next();
 
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  const { id: userId, iat } = decoded;
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    const { id: userId, iat } = decoded;
 
-  const currentUser = await User.findById(userId);
+    const currentUser = await User.findById(userId);
 
-  const isPasswordChangedAfter = currentUser.changedPasswordAfter(iat);
-  if (isPasswordChangedAfter) {
+    const isPasswordChangedAfter = currentUser.changedPasswordAfter(iat);
+    if (isPasswordChangedAfter) {
+      return next();
+    }
+    res.locals.user = currentUser;
+  } catch (error) {
     return next();
   }
-  res.locals.user = currentUser;
+
   next();
 });
 
@@ -204,4 +216,5 @@ module.exports = {
   resetPassword,
   updatePassword,
   isLoggedIn,
+  logout,
 };

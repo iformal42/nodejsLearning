@@ -20,3 +20,14 @@ export const login = async (email, password) => {
     showAlert('error', error.response.data.message);
   }
 };
+
+export const logout = async () => {
+  try {
+    const url = 'http://localhost:3000/api/v1/users/logout';
+
+    const res = await axios(url);
+    if ((res.data.status = 'success')) location.reload(true);
+  } catch (error) {
+    showAlert('error', 'Error logging out! Try again');
+  }
+};

@@ -19,11 +19,13 @@ const {
   updatePassword,
   protect,
   restrictsTo,
+  logout,
 } = require('../controller/authController');
 const { roles } = require('../utils/constanst');
 
 router.post('/signup', signup);
 router.post('/login', login);
+router.get('/logout', logout);
 
 router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:resetToken', resetPassword);

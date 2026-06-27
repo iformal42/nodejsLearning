@@ -1,10 +1,11 @@
 /* eslint-disable */
 import '@babel/polyfill';
-import { login } from './login';
+import { login, logout } from './login';
 import { displaymap } from './mapbox';
 console.log('parcel');
 const mapEl = document.getElementById('map');
 const loginForm = document.querySelector('.form');
+const logoutButton = document.querySelector('.nav__el--logout');
 if (loginForm) {
   loginForm.addEventListener('submit', (e) => {
     console.log('Submit event fired');
@@ -19,4 +20,7 @@ if (loginForm) {
 if (mapEl) {
   const locations = JSON.parse(mapEl.dataset.locations);
   displaymap(locations);
+}
+if (logoutButton) {
+  logoutButton.addEventListener('click', logout);
 }
