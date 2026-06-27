@@ -18,33 +18,54 @@ const handleJWTError = () => {
 const handleJWTExpiredError = () => {
   return new AppError(401, 'Token Expired. Please login again');
 };
-const sendDevErrors = (err, res) =>
-  res.status(err.statusCode || 500).json({
-    status: err.status || 'error',
-    message: err.message,
-    error: err,
-    stack: err.stack,
-  });
-
-const sendProdErrors = (err, res) => {
-  if (err?.isOperational) {
+const sendDevErrors = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
     res.status(err.statusCode || 500).json({
       status: err.status || 'error',
       message: err.message,
+      error: err,
+      stack: err.stack,
     });
   } else {
-    // Programming or other unknown error: dont leak error detail
     console.error('Error 💥: ', err);
 
-    res.status(500).json({
-      status: 'error',
-      message: 'Something went very wrong',
+    res.status(err.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: err.message,
     });
   }
 };
 
+const sendProdErrors = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    if (err?.isOperational) {
+      return res.status(err.statusCode || 500).json({
+        status: err.status || 'error',
+        message: err.message,
+      });
+    }
+    // Programming or other unknown error: dont leak error detail
+    console.error('Error 💥: ', err);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Something went very wrong',
+    });
+  }
+  if (err?.isOperational) {
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: err.message,
+    });
+  }
+  return res.status(500).render('error', {
+    title: 'Something went wrong!',
+    msg: 'Please try again later',
+  });
+};
+
 const globalErrorHandler = (err, req, res, next) => {
-  if (process.env.NODE_ENV === 'development') sendDevErrors(err, res);
+  if (process.env.NODE_ENV === 'development') sendDevErrors(err, req, res);
   else {
     // for production and others, error should be minimal to the client
     let error = Object.create(
@@ -63,7 +84,7 @@ const globalErrorHandler = (err, req, res, next) => {
       error = handleJWTExpiredError();
     }
 
-    sendProdErrors(error, res);
+    sendProdErrors(error, req, res);
   }
   next();
 };
