@@ -1,2 +1,18 @@
-node_modules
+node_modules/
 .env
+
+# Parcel
+.cache/
+dist/
+
+# Generated bundles
+public/js/bundle.js
+public/js/bundle.js.map
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store

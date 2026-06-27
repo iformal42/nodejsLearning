@@ -7,7 +7,6 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const sendEmail = require('../utils/email');
 const { BASEURL, NODE_ENV } = require('../utils/constanst');
-const { log } = require('console');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -61,11 +60,15 @@ const login = catchAsync(async (req, res, next) => {
 const protect = catchAsync(async (req, res, next) => {
   const { authorization } = req.headers;
 
-  if (!authorization || !authorization.startsWith('Bearer'))
+  if (
+    !req.cookies.jwt ||
+    !authorization ||
+    !authorization.startsWith('Bearer')
+  ) {
     return next(new AppError(401, 'Invalid users'));
+  }
 
-  const token = authorization.split(' ')[1];
-  // console.log();
+  const token = req.cookies.jwt || authorization.split(' ')[1];
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   const { id: userId, iat } = decoded;
 
@@ -82,6 +85,24 @@ const protect = catchAsync(async (req, res, next) => {
 
   req.user = currentUser;
 
+  next();
+});
+
+// Only for render pages and no error
+const isLoggedIn = catchAsync(async (req, res, next) => {
+  const token = req.cookies.jwt;
+  if (!token) return next();
+
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  const { id: userId, iat } = decoded;
+
+  const currentUser = await User.findById(userId);
+
+  const isPasswordChangedAfter = currentUser.changedPasswordAfter(iat);
+  if (isPasswordChangedAfter) {
+    return next();
+  }
+  res.locals.user = currentUser;
   next();
 });
 
@@ -182,4 +203,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   updatePassword,
+  isLoggedIn,
 };

@@ -16,8 +16,14 @@ const getTourview = catchAsync(async (req, res) => {
     tour,
   });
 });
+const getLogin = catchAsync(async (req, res) => {
+  res.status(200).render('login', {
+    title: 'login',
+  });
+});
 
 module.exports = {
   getOverview,
   getTourview,
+  getLogin,
 };

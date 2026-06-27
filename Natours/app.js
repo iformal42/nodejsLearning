@@ -6,7 +6,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
-
+const cookiePareser = require('cookie-parser');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
@@ -27,7 +27,11 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
 
-        scriptSrc: ["'self'", 'https://cdn.maptiler.com'],
+        scriptSrc: [
+          "'self'",
+          'https://cdn.jsdelivr.net',
+          'https://cdn.maptiler.com',
+        ],
 
         workerSrc: ["'self'", 'blob:'],
 
@@ -66,6 +70,8 @@ app.use(
   }),
 );
 
+app.use(cookiePareser());
+
 // Data sanitization against Nosql query injection
 app.use(mongoSanitize());
 
@@ -77,6 +83,10 @@ app.use(
     whitelist: ['duration'],
   }),
 );
+
+app.use((req, res, next) => {
+  next();
+});
 
 app.use(`/`, viewRouter);
 app.use(`${BASEURL}/tours`, tourRouter);
