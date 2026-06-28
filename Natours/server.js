@@ -8,7 +8,6 @@ process.on('uncaughtException', (err) => {
 });
 dotenv.config({ path: './.env' });
 const app = require('./app');
-const { importData, DeleteImportData } = require('./scripts/import-dev-data');
 
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',

@@ -2,13 +2,15 @@
 import '@babel/polyfill';
 import { login, logout } from './login';
 import { displaymap } from './mapbox';
-console.log('parcel');
+import { updateDataSettings } from './updateSettings';
+
 const mapEl = document.getElementById('map');
-const loginForm = document.querySelector('.form');
+const loginForm = document.getElementById('login-from');
+const profileForm = document.getElementById('setting-form');
+const passwordForm = document.getElementById('form-password');
 const logoutButton = document.querySelector('.nav__el--logout');
 if (loginForm) {
   loginForm.addEventListener('submit', (e) => {
-    console.log('Submit event fired');
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -23,4 +25,41 @@ if (mapEl) {
 }
 if (logoutButton) {
   logoutButton.addEventListener('click', logout);
+}
+
+if (profileForm) {
+  profileForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = e.target.name.value;
+    const email = e.target.email.value;
+
+    updateDataSettings({ name, email }, 'data');
+  });
+}
+
+if (passwordForm) {
+  passwordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.submitter;
+    btn.textContent = 'Updating password...';
+    btn.disabled = true;
+
+    const currentPassword = e.target.currentpassword;
+    const newPassword = e.target.newpassword;
+    const passwordConfirm = e.target.confirmpassword;
+
+    await updateDataSettings(
+      {
+        currentPassword: currentPassword.value,
+        newPassword: newPassword.value,
+        passwordConfirm: passwordConfirm.value,
+      },
+      'password',
+    );
+    currentPassword.value = '';
+    newPassword.value = '';
+    passwordConfirm.value = '';
+    btn.textContent = 'SAVE PASSWORD';
+    btn.disabled = false;
+  });
 }

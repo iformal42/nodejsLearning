@@ -27,7 +27,7 @@ const updateMe = catchAsync(async (req, res, next) => {
   if (password || confirmPassword) {
     return next(
       new AppError(
-        404,
+        400,
         'This route is not use for update .Please use /update-password',
       ),
     );

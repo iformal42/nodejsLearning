@@ -1,11 +1,10 @@
 import axios from 'axios';
 import { showAlert } from './alert';
-
+import { BASEURL } from '../../utils/constanst';
+const url = `${BASEURL}/users`;
 export const login = async (email, password) => {
-  const url = 'http://localhost:3000/api/v1/users/login';
-
   try {
-    const res = await axios.post(url, {
+    const res = await axios.post(`${url}/login`, {
       email,
       password,
     });
@@ -16,16 +15,13 @@ export const login = async (email, password) => {
       location.assign('/');
     }, 1500);
   } catch (error) {
-    // console.error('error', error);
     showAlert('error', error.response.data.message);
   }
 };
 
 export const logout = async () => {
   try {
-    const url = 'http://localhost:3000/api/v1/users/logout';
-
-    const res = await axios(url);
+    const res = await axios(`${url}/logout`);
     if ((res.data.status = 'success')) location.reload(true);
   } catch (error) {
     showAlert('error', 'Error logging out! Try again');

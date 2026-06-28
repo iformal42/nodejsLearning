@@ -66,11 +66,10 @@ const logout = (req, res) => {
 };
 const protect = catchAsync(async (req, res, next) => {
   const { authorization } = req.headers;
-
+  console.log('cookie', req.cookies.jwt);
   if (
-    !req.cookies.jwt ||
-    !authorization ||
-    !authorization.startsWith('Bearer')
+    !req.cookies.jwt &&
+    (!authorization || !authorization.startsWith('Bearer'))
   ) {
     return next(new AppError(401, 'Invalid users'));
   }
@@ -91,6 +90,7 @@ const protect = catchAsync(async (req, res, next) => {
   }
 
   req.user = currentUser;
+  res.locals.user = currentUser;
 
   next();
 });
