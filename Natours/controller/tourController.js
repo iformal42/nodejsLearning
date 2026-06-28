@@ -1,3 +1,6 @@
+const multer = require('multer');
+const sharp = require('sharp');
+
 const Tour = require('../models/tourModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
@@ -8,6 +11,57 @@ const {
   getOne,
   getAll,
 } = require('./handleFactory');
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (!file.mimetype.startsWith('image')) {
+    return cb(new AppError(400, 'Not an image! Please upload only images'));
+  }
+  cb(null, true);
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+const uploadToutImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  {
+    name: 'images',
+    maxCount: 3,
+  },
+]);
+
+const resizeTourImages = catchAsync(async (req, res, next) => {
+  if (!req.files.imageCover || !req.files.images) return next();
+  const imageCoverFilename = `tour-${req.params.id}-cover.jpeg`;
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${imageCoverFilename}`);
+
+  const images = [];
+  let i = 1;
+  for (const file of req.files.images) {
+    const filename = `tour-${req.params.id}-${Date.now()}-${i}.jpeg`;
+    await sharp(file.buffer)
+      .resize(2000, 1333)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/img/tours/${filename}`);
+    images.push(filename);
+    i++;
+  }
+
+  req.body.imageCover = imageCoverFilename;
+
+  req.body.images = images;
+
+  next();
+});
 
 const aliasTopTours = (req, res, next) => {
   req.query = {
@@ -172,4 +226,6 @@ module.exports = {
   getMonthlyClient,
   getTourWithin,
   getDistnaces,
+  resizeTourImages,
+  uploadToutImages,
 };

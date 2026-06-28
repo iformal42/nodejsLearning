@@ -30,10 +30,16 @@ if (logoutButton) {
 if (profileForm) {
   profileForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    const form = new FormData();
     const name = e.target.name.value;
     const email = e.target.email.value;
+    const photo = e.target.photo.files[0];
+    console.log(e.target.photo.files);
+    form.append('name', name);
+    form.append('email', email);
+    form.append('photo', photo);
 
-    updateDataSettings({ name, email }, 'data');
+    updateDataSettings(form, 'data');
   });
 }
 

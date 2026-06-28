@@ -10,6 +10,8 @@ const {
   updateMe,
   deleteMe,
   getMe,
+  uploadUserPhoto,
+  resizeUserPhoto,
 } = require('../controller/userController');
 const {
   signup,
@@ -34,7 +36,7 @@ router.use(protect);
 // all below routes are protected
 router.patch('/update-password', updatePassword);
 router.get('/get-me', getMe, getUser);
-router.patch('/update-me', updateMe);
+router.patch('/update-me', uploadUserPhoto, resizeUserPhoto, updateMe);
 router.delete('/delete-me', protect, deleteMe);
 
 router.use(restrictsTo(roles.admin));
