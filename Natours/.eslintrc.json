@@ -20,11 +20,11 @@
         "argsIgnorePattern": "req|res|next|val"
       }
     ],
-    "no-restricted-syntax": [
-        "error",
-        "ForInStatement",
-        "LabeledStatement",
-        "WithStatement",
-      ],
+    // "no-restricted-syntax": [
+    //     "error",
+    //     "ForInStatement",
+    //     "LabeledStatement",
+    //     "WithStatement"
+    //   ]
   }
 }
